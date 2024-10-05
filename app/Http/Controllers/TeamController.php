@@ -6,36 +6,38 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\createTeamRequest;
 use App\Models\Team;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TeamController extends Controller
 {
-   private $team, $request;
+    private $team, $request;
 
-   public function __construct(Team $team, Request $request)
-   {
-      $this->team = $team;
-      $this->request = $request;
-   }
+    public function __construct(Team $team, Request $request)
+    {
+        $this->team = $team;
+        $this->request = $request;
+    }
 
-   public function getAll(){
+    public function getAll()
+    {
 
-    return $this->team->getAll();
-   }
+        return $this->team->getAll();
+    }
 
-   public function getById($id)
-   {
+    public function getById($id)
+    {
 
-      $team = $this->team->getById($id);
+        $team = $this->team->getById($id);
 
         if ($team == null) {
             return response(["message" => "Registro não encontrado!"], 404);
         }
 
-       return $team;
-   }
+        return $team;
+    }
 
-   public function getWithoutPlayers()
-   {
+    public function getWithoutPlayers()
+    {
         $team = $this->team->getWithoutPlayers();
 
         if ($team == null) {
@@ -43,12 +45,21 @@ class TeamController extends Controller
         }
 
         return $team;
-   }
+    }
 
-   public function createTeam(createTeamRequest $request)
-   {
-       $teamValidated = $this->team->createTeam($request);
+    public function createTeam(createTeamRequest $request)
+    {
+        try {
+            $teamValidated = $this->team->createTeam($request);
 
-       
-   }
+            return response()->json([
+                'message' => 'time criado com sucesso',
+                'team' => $teamValidated
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'erros' => $e->errors()
+            ], 201);
+        }
+    }
 }

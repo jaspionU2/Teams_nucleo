@@ -10,3 +10,4 @@ Route::get('/', function () {
 Route::get('/teams', [TeamController::class, 'getAll']);
 Route::get('/teams/{id}', [TeamController::class, 'getById']);
 Route::get('/teams/WithoutPlayers', [TeamController::class, 'getWithoutPlayers']);
+Route::post('/teams/createTeam', [TeamController::class, 'createTeam']);
