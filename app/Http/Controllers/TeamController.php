@@ -5,8 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\createTeamRequest;
 use App\Models\Team;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+
+
 
 class TeamController extends Controller
 {
@@ -44,22 +49,41 @@ class TeamController extends Controller
             return response()->json(['message' => 'não existe time sem jogadores'], 200);
         }
 
-        return $team;
+        return  response()->json($team, 200);
     }
 
     public function createTeam(createTeamRequest $request)
     {
-        try {
-            $teamValidated = $this->team->createTeam($request);
+       $validatedTeam = $this->team->createTeam($request);
 
-            return response()->json([
-                'message' => 'time criado com sucesso',
-                'team' => $teamValidated
-            ], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'erros' => $e->errors()
-            ], 201);
+        if($validatedTeam !== false)
+        {
+            // return response()->json([
+            //     'message' => 'Time criado com sucesso',
+            //     'team' => $validatedTeam,
+            // ], 201);
+
+            return dd($validatedTeam);
+        }
+
+
+        // return response()->json([
+        //     'message' => 'Erro ao gravar o time'
+        // ], 500); 
+          return dd($validatedTeam);
+        }
+
+        public function deleteTeam($id)
+        {
+
+           $deletedTeam = $this->team->deleteTeam($id);
+             
+           if($deletedTeam)
+           {
+             return response()->json(['message' => 'o time foi deletado com sucesso'], 200);
+           }
+
+            return response()->json(['message' => 'time não encontrado'], 404);
         }
     }
-}
+

@@ -11,7 +11,7 @@ use function PHPUnit\Framework\fileExists;
 
 class Team extends Model
 {
-    private $path = 'db/teams.txt';
+    private $path = 'db/teams.json';
 
 
     public function getAll()
@@ -28,53 +28,60 @@ class Team extends Model
 
     public function getWithoutPlayers()
     {
-        $teamWithoutPlayer = collect($this->getAll())->where('players', '==', null);
+        $teamWithoutPlayer = collect($this->getAll())->where('players', null);
 
         return $teamWithoutPlayer;
     }
 
     public function createTeam(createTeamRequest $request)
     {
+
+        $validatedData = $request->validated();
+
+        // $organizedData = [
+        //     'id' => $validatedData['id'],
+        //     'nameTime' => $validatedData['nameTime'],
+        //     'players' => $validatedData['players'],
+        //     'foundation_date' => $validatedData['foundation_date'],
+        // ];
+
         $teams = $this->getAll();
-        $teams[] = $request->validate();
 
-        Storage::put($this->path, json_encode($teams));
+        $teams[] = $validatedData;
 
-        return $request->validate();
+        if (Storage::put($this->path, json_encode($teams))) {
+            return $validatedData;
+        }
+
+        return false;
     }
 
     public function updateTeam($id, $updateTeam)
     {
         $teams = collect($this->getAll());
 
-        foreach($teams as $key => $team){
-            if($team['id'] == $id)
-            {
-               $teams[$key] = array_merge($team, $updateTeam);
-               Storage::put($this->path, json_encode($teams, true));
-               return $team;
+        foreach ($teams as $key => $team) {
+            if ($team['id'] == $id) {
+                $teams[$key] = array_merge($team, $updateTeam);
+                Storage::put($this->path, json_encode($teams, true));
+                return $team;
             }
-           
         }
 
         return false;
     }
 
-    public function deleteTeam($id) 
+    public function deleteTeam($id)
     {
         $teams = collect($this->getAll());
 
         $team = $teams->search(fn($team) => $team['id'] == $id);
 
-         if($team !== false)
-         {
-            $teams->forget($team);
-            Storage::put($this->path, json_encode($teams, true));
+        if ($team !== false) {
+            $teams->splice($team, 1);
+            Storage::put($this->path, json_encode($teams->values()->all()));
             return true;
-         }
-       return false;
+        }
+        return false;
     }
 }
-
-
-

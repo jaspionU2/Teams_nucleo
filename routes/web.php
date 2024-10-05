@@ -8,6 +8,7 @@ Route::get('/', function () {
 });
 
 Route::get('/teams', [TeamController::class, 'getAll']);
-Route::get('/teams/{id}', [TeamController::class, 'getById']);
+Route::post('/teams/create', [TeamController::class, 'createTeam']);
 Route::get('/teams/WithoutPlayers', [TeamController::class, 'getWithoutPlayers']);
-Route::post('/teams/createTeam', [TeamController::class, 'createTeam']);
+Route::get('/teams/{id}', [TeamController::class, 'getById']);
+Route::delete('/teams/{id}', [TeamController::class, 'deleteTeam']);
